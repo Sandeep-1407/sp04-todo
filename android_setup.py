@@ -13,7 +13,14 @@ shutil.copy(os.path.join(ROOT, 'LockerPlugin.java'), os.path.join(PKG, 'LockerPl
 with open(os.path.join(PKG, 'MainActivity.java'), 'w') as f:
     f.write('''package com.sandeep.sp04;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -21,6 +28,24 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(LockerPlugin.class);
         super.onCreate(savedInstanceState);
+        // Keep the app below the phone's status bar and above the navigation bar (Android 15+ draws edge-to-edge).
+        int bg = Color.parseColor("#120f3e");
+        getWindow().getDecorView().setBackgroundColor(bg);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(false);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+        View web = getBridge().getWebView();
+        ViewCompat.setOnApplyWindowInsetsListener(web, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            lp.topMargin = bars.top;
+            lp.leftMargin = bars.left;
+            lp.rightMargin = bars.right;
+            lp.bottomMargin = Math.max(bars.bottom, ime.bottom);
+            v.setLayoutParams(lp);
+            return WindowInsetsCompat.CONSUMED;
+        });
+        ViewCompat.requestApplyInsets(web);
     }
 }
 ''')
