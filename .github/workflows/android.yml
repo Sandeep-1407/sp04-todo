@@ -1,0 +1,57 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install ImageMagick
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
+
+      - name: Prepare app folder
+        run: |
+          mkdir -p app/www app/android-src
+          cp *.html *.js *.webmanifest *.png app/www/
+          rm -f app/www/sw.js
+          cp LockerPlugin.java android_setup.py app/android-src/
+          cd app
+          npm init -y >/dev/null
+          npm i @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/local-notifications@7 @capacitor/filesystem@7
+          echo '{"appId":"com.sandeep.sp04","appName":"SP04 Organizer","webDir":"www"}' > capacitor.config.json
+          npx cap add android
+          python3 android-src/android_setup.py
+          npx cap sync android
+
+      - name: Build APK
+        run: |
+          cd app/android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../../SP04-Organizer.apk
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "apk-${{ github.run_number }}" SP04-Organizer.apk \
+            --title "SP04 Organizer Android (build ${{ github.run_number }})" \
+            --notes "Install: download SP04-Organizer.apk, open it, allow 'Install unknown apps'. Create your PIN. Photo Locker removes hidden photos from the Gallery; reminders work even when the app is closed." \
+            --latest
