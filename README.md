@@ -16,6 +16,11 @@ All-in-one personal organizer, locked with your PIN. Hindi + English.
 - 🖼️ **Photo Locker** – photos locked inside the app, not visible in the Gallery
 - ⚙️ **Settings** – language, change PIN, auto-lock, backup and restore
 
+## Look (v2)
+- Clean white / off-white design (navy + gold), **dark mode** option
+- Settings → Appearance: **text size** (Small / Normal / Large / Extra large), **buttons** (Icons / Icon + text / Text only), **floating + button** on/off, language
+- Bottom tab bar on phones: Home · Tasks · Money · Notes · More
+
 ## Security
 - A random key encrypts every record and photo (AES-GCM 256). The key itself is locked with your PIN (PBKDF2, 210,000 rounds).
 - Data stays only on the phone. Backups are files locked with the same PIN.

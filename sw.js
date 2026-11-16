@@ -1,6 +1,6 @@
 // SP04 service worker: works offline after the first visit
-const VERSION = 'sp04-v1';
-const SHELL = ['./', './index.html', './core.js', './pages-a.js', './pages-b.js', './pages-c.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './favicon.png'];
+const VERSION = 'sp04-v2';
+const SHELL = ['./', './index.html', './core.js', './pages-a.js', './pages-b.js', './pages-c.js', './ui.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './favicon.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });

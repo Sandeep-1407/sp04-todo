@@ -171,7 +171,7 @@ PAGES.note = {
 };
 
 function RichEd(body, n, touch) {
-  const colors = ['#f6d98b', '#ff7a8a', '#6fe0a8', '#8ab4ff', '#f4f0ff'];
+  const colors = ['#c28a16', '#d6455d', '#1f9d68', '#2d6cdf', '#6b4fd6'];
   body.innerHTML = `<div class="tb" id="tb">
       <button data-c="bold"><b>B</b></button><button data-c="italic"><i>I</i></button><button data-c="underline"><u>U</u></button>
       <button data-b="H1">H1</button><button data-b="H2">H2</button><button data-b="P">¶</button>

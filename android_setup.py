@@ -29,10 +29,10 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(LockerPlugin.class);
         super.onCreate(savedInstanceState);
         // Keep the app below the phone's status bar and above the navigation bar (Android 15+ draws edge-to-edge).
-        int bg = Color.parseColor("#120f3e");
+        int bg = Color.parseColor("#f6f5f1");
         getWindow().getDecorView().setBackgroundColor(bg);
-        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(false);
-        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(false);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightStatusBars(true);
+        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView()).setAppearanceLightNavigationBars(true);
         View web = getBridge().getWebView();
         ViewCompat.setOnApplyWindowInsetsListener(web, (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
