@@ -26,12 +26,23 @@ jobs:
       - name: Install ImageMagick
         run: sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
 
+      - name: Unlock signing key
+        env:
+          SP_KEY_PASS: ${{ secrets.SP_KEY_PASS }}
+        run: |
+          if [ -z "$SP_KEY_PASS" ]; then echo "::error::Secret SP_KEY_PASS is missing (Settings > Secrets and variables > Actions)"; exit 1; fi
+          mkdir -p "$HOME/spkey"
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in sp-apps.keystore.enc -pass env:SP_KEY_PASS | tar x -C "$HOME/spkey"
+          echo "::add-mask::$(cat "$HOME/spkey/pass.txt")"
+          echo "SP_KEYSTORE=$HOME/spkey/sp-apps.keystore" >> "$GITHUB_ENV"
+          echo "SP_KS_PASS=$(cat "$HOME/spkey/pass.txt")" >> "$GITHUB_ENV"
+
       - name: Prepare app folder
         run: |
           mkdir -p app/www app/android-src
           cp *.html *.js *.webmanifest *.png app/www/
           rm -f app/www/sw.js
-          cp LockerPlugin.java android_setup.py app/android-src/
+          cp LockerPlugin.java AppUpdaterPlugin.java android_setup.py app/android-src/
           cd app
           npm init -y >/dev/null
           npm i @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/local-notifications@7 @capacitor/filesystem@7

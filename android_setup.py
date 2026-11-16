@@ -80,4 +80,32 @@ for d, px in sizes.items():
         os.remove(f)
     for name in ('ic_launcher.png', 'ic_launcher_round.png'):
         subprocess.run(['convert', icon, '-resize', f'{px}x{px}', os.path.join(folder, name)], check=True)
-print('Android project prepared')
+
+# ---- in-app updates, one fixed signing key, build number as version ----
+CPKG = os.path.join(AND, 'java', 'com', 'sandeep', 'common')
+os.makedirs(CPKG, exist_ok=True)
+shutil.copy(os.path.join(ROOT, 'AppUpdaterPlugin.java'), os.path.join(CPKG, 'AppUpdaterPlugin.java'))
+_ma = os.path.join(PKG, 'MainActivity.java'); _s = open(_ma).read()
+if 'AppUpdaterPlugin' not in _s:
+    _s = _s.replace('import com.getcapacitor.BridgeActivity;', 'import com.getcapacitor.BridgeActivity;\nimport com.sandeep.common.AppUpdaterPlugin;', 1)
+    _s = _s.replace('super.onCreate(savedInstanceState);', 'registerPlugin(AppUpdaterPlugin.class);\n        super.onCreate(savedInstanceState);', 1)
+    open(_ma, 'w').write(_s)
+_m = open(mf).read()
+if 'REQUEST_INSTALL_PACKAGES' not in _m:
+    _m = _m.replace('</manifest>', '    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n</manifest>', 1)
+    open(mf, 'w').write(_m)
+_fp = os.path.join(AND, 'res', 'xml', 'file_paths.xml')
+if os.path.exists(_fp):
+    _x = open(_fp).read()
+    if 'external-files-path' not in _x:
+        _x = _x.replace('</paths>', '    <external-files-path name="sp_updates" path="." />\n</paths>', 1); open(_fp, 'w').write(_x)
+import re
+_gr = os.path.join(APP, 'android', 'app', 'build.gradle'); _g = open(_gr).read()
+_n = int(os.environ.get('GITHUB_RUN_NUMBER', '1'))
+_g = re.sub(r'versionCode \d+', 'versionCode %d' % _n, _g, count=1)
+_g = re.sub(r'versionName "[^"]*"', 'versionName "1.%d"' % _n, _g, count=1)
+if os.environ.get('SP_KEYSTORE') and 'signingConfigs.sp' not in _g:
+    _g = _g.replace('android {', 'android {\n    signingConfigs { sp { storeFile file(System.getenv("SP_KEYSTORE")); storePassword System.getenv("SP_KS_PASS"); keyAlias "sp"; keyPassword System.getenv("SP_KS_PASS") } }', 1)
+    _g = _g.replace('buildTypes {', 'buildTypes {\n        debug { signingConfig signingConfigs.sp }', 1)
+open(_gr, 'w').write(_g)
+print('updater + signing + version', _n)
